@@ -1,10 +1,3 @@
-/*Програма запускає на виконання 3 потоки.
-Перший з них виводить на екран у циклі числа від 1 до 10000,
-другий від 10000 до 1,
-третій – різницю між числами в першому і в другому потоках.
-Після кожного висновку потік припиняється на 10 мс.
-Крім цього, на екран кожні 2 сек.виводиться інформація про час виконання кожного потоку.*/
-
 #include <windows.h> // підключення бібліотеки з функціями API
 #include <string> 
 const UINT WM_APP_MY_THREAD_UPDATE = WM_APP + 0;
@@ -26,7 +19,6 @@ void RetreaveTime(PVOID p);
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-static void Paint(HWND hWnd, LPPAINTSTRUCT lpPS);
 
 // Основна програма 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
@@ -70,9 +62,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	return RegisterClassEx(&wcex); 			//реєстрація класу вікна
 }
 
-// FUNCTION: InitInstance (HANDLE, int)
-// Створює вікно програми і зберігає дескриптор програми в змінній hInst
-
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	HWND hWnd;
@@ -98,9 +87,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	return TRUE;
 }
 
-// FUNCTION: WndProc (HWND, unsigned, WORD, LONG)
-// Віконна процедура. Приймає і обробляє всі повідомлення, що приходять в додаток
-
 HANDLE threadInc, threadDec, threadSub, timeThread;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -125,7 +111,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	case WM_PAINT: 				//Перемалювати вікно
 		hdc = BeginPaint(hWnd, &ps); 	//Почати графічний вивід	
-		Paint(hWnd, &ps);
 		EndPaint(hWnd, &ps); 		//Закінчити графічний вивід	
 		break;
 	case WM_APP_MY_THREAD_UPDATE: {
@@ -150,7 +135,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 DWORD PrintIncrease(PVOID p) {
 	QueryPerformanceCounter(&StInc);
-	/******************/
 	HWND hWnd = (HWND)p;
 	HDC hdc = GetDC(hWnd);
 	RECT rt;
@@ -253,7 +237,6 @@ void RetreaveTime(PVOID p) {
 	int posX = 40;
 	int posY = 40;
 	static DWORD exCodeInc, exCodeSub, exCodeDec;
-	//	Sleep(20); // задля того
 	while (1) {
 		char str[40];
 		std::string timeIncStr, timeDecStr, timeSubStr;
@@ -278,88 +261,4 @@ void RetreaveTime(PVOID p) {
 		Sleep(2);
 	}
 	ReleaseDC(hWnd, hdc);
-}
-
-static void Paint(HWND hWnd, LPPAINTSTRUCT lpPS)
-{
-	RECT rc;
-	HDC hdcMem;
-	HBITMAP hbmMem, hbmOld;
-	HBRUSH hbrBkGnd;
-	HFONT hfntOld;
-
-	//
-	// Get the size of the client rectangle.
-	//
-
-	GetClientRect(hWnd, &rc);
-
-	//
-	// Create a compatible DC.
-	//
-
-	hdcMem = CreateCompatibleDC(lpPS->hdc);
-
-	//
-	// Create a bitmap big enough for our client rectangle.
-	//
-
-	hbmMem = CreateCompatibleBitmap(lpPS->hdc,
-		rc.right - rc.left,
-		rc.bottom - rc.top);
-
-	//
-	// Select the bitmap into the off-screen DC.
-	//
-
-	hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
-
-	//
-	// Erase the background.
-	//
-
-	hbrBkGnd = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
-	FillRect(hdcMem, &rc, hbrBkGnd);
-	DeleteObject(hbrBkGnd);
-
-	//
-	// Select the font.
-	//
-
-	//if (hFont) {
-	//hfntOld = (HFONT)SelectObject(hdcMem, hFont);
-	//}
-
-	//
-	// Render the image into the offscreen DC.
-	//
-
-	SetBkMode(hdcMem, TRANSPARENT);
-	SetTextColor(hdcMem, GetSysColor(COLOR_WINDOWTEXT));
-	//TextOut(hdcMem, 0, 0, szBuf, sizeof(szBuf));
-
-
-	//if (hfntOld) {
-	//	SelectObject(hdcMem, hfntOld);
-	//}
-
-	//
-	// Blt the changes to the screen DC.
-	//
-
-	BitBlt(lpPS->hdc,
-		rc.left, rc.top,
-		rc.right - rc.left, rc.bottom - rc.top,
-		hdcMem,
-		0, 0,
-		SRCCOPY);
-
-	//
-	// Done with off-screen bitmap and DC.
-	//
-
-	SelectObject(hdcMem, hbmOld);
-	DeleteObject(hbmMem);
-	DeleteDC(hdcMem);
-
 }
