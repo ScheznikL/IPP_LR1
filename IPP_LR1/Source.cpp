@@ -1,16 +1,16 @@
-#include <windows.h> // підключення бібліотеки з функціями API
+#include <windows.h> 
 #include <string> 
 const UINT WM_APP_MY_THREAD_UPDATE = WM_APP + 0;
 
-// Глобальні змінні:
-HINSTANCE hInst; 	//Дескриптор програми	
+
+HINSTANCE hInst; 	
 LPCTSTR szWindowClass = "var2";
 LPCTSTR szTitle = "IPP_Lab1";
 int x = 1;
 int y = 10000;
 LARGE_INTEGER Fraq;
 LARGE_INTEGER StInc, EnInc, StDec, EnDec, StSub, EnSub;
-// Попередній опис функцій
+
 DWORD PrintIncrease(PVOID p);
 DWORD PrintDecrease(PVOID p);
 DWORD PrintSubtraction(PVOID p);
@@ -20,21 +20,18 @@ ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-// Основна програма 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
 	int nCmdShow)
 {
 	MSG msg;
 
-	// Реєстрація класу вікна 
 	MyRegisterClass(hInstance);
 
-	// Створення вікна програми
 	if (!InitInstance(hInstance, nCmdShow))
 	{
 		return FALSE;
 	}
-	// Цикл обробки повідомлень
+
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);
@@ -47,43 +44,43 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style = CS_HREDRAW | CS_VREDRAW; 		//стиль вікна
-	wcex.lpfnWndProc = (WNDPROC)WndProc; 		//віконна процедура
+	wcex.style = CS_HREDRAW | CS_VREDRAW; 		
+	wcex.lpfnWndProc = (WNDPROC)WndProc; 		
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance; 			//дескриптор програми
-	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION); 		//визначення іконки
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW); 	//визначення курсору
-	wcex.hbrBackground = GetSysColorBrush(COLOR_WINDOW); //установка фону
-	wcex.lpszMenuName = NULL; 				//визначення меню
-	wcex.lpszClassName = szWindowClass; 		//ім’я класу
+	wcex.hInstance = hInstance; 			
+	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION); 		
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW); 	
+	wcex.hbrBackground = GetSysColorBrush(COLOR_WINDOW); 
+	wcex.lpszMenuName = NULL; 				
+	wcex.lpszClassName = szWindowClass; 		
 	wcex.hIconSm = NULL;
 
-	return RegisterClassEx(&wcex); 			//реєстрація класу вікна
+	return RegisterClassEx(&wcex); 			
 }
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	HWND hWnd;
-	hInst = hInstance; //зберігає дескриптор додатка в змінній hInst
-	hWnd = CreateWindow(szWindowClass, 	// ім’я класу вікна
-		szTitle, 				// назва програми
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZE,			// стиль вікна
-		CW_USEDEFAULT, 			// положення по Х	
-		CW_USEDEFAULT,			// положення по Y	
-		500, 			// розмір по Х
-		200, 			// розмір по Y
-		NULL, 					// дескриптор батьківського вікна	
-		NULL, 					// дескриптор меню вікна
-		hInstance, 				// дескриптор програми
-		NULL); 				// параметри створення.
+	hInst = hInstance; 
+	hWnd = CreateWindow(szWindowClass, 	
+		szTitle, 				
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZE,		
+		CW_USEDEFAULT, 			
+		CW_USEDEFAULT,			
+		500, 		
+		200, 			
+		NULL, 					
+		NULL, 					
+		hInstance, 				
+		NULL); 				
 
-	if (!hWnd) 	//Якщо вікно не творилось, функція повертає FALSE
+	if (!hWnd) 
 	{
 		return FALSE;
 	}
-	ShowWindow(hWnd, nCmdShow); 		//Показати вікно
-	UpdateWindow(hWnd); 				//Оновити вікно
+	ShowWindow(hWnd, nCmdShow); 	
+	UpdateWindow(hWnd); 			
 	return TRUE;
 }
 
@@ -96,10 +93,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	DWORD id;
 	switch (message)
 	{
-	case WM_CREATE: {			//Повідомлення приходить при створенні вікна
+	case WM_CREATE: {		
 		if (QueryPerformanceFrequency(&Fraq) == 0) {
-			MessageBox(hWnd, "Встановлене обладнання НЕ підтримує лічильник продуктивності високої роздільної здатності\nЗначення часу може бути не точним",
-				"Попередження", MB_ICONWARNING);
+			MessageBox(hWnd, "Your hardware doens't support a high-resolution performance counter!\nTime values will be unclear.",
+				"Warning", MB_ICONWARNING);
 		}
 
 		threadInc = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)PrintIncrease, hWnd, 0, NULL);
@@ -109,25 +106,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
-	case WM_PAINT: 				//Перемалювати вікно
-		hdc = BeginPaint(hWnd, &ps); 	//Почати графічний вивід	
-		EndPaint(hWnd, &ps); 		//Закінчити графічний вивід	
+	case WM_PAINT: 				
+		hdc = BeginPaint(hWnd, &ps); 	
+		EndPaint(hWnd, &ps); 	
 		break;
 	case WM_APP_MY_THREAD_UPDATE: {
 		GetClientRect(hWnd, &rt);
 		rt.left = 0;
-		rt.top = lParam - 20; //from TextOut
+		rt.top = lParam - 20; 
 
 		rt.bottom = lParam;
 		InvalidateRect(hWnd, &rt, TRUE);
 		break;
 	}
 
-	case WM_DESTROY: 				//Завершення роботи
+	case WM_DESTROY: 				
 		PostQuitMessage(0);
 		break;
 	default:
-		//Обробка повідомлень, які не оброблені користувачем
+		
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
